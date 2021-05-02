@@ -31,8 +31,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "shubhicli",
 	Short: "A simple cli to manage my home server",
-	Long: `CLI tool to manage my home server. I am planning to add a bunch of commands
-	for status check and ssh'ing into the server etc.`,
+	Long:  `CLI tool to manage my home server. I am planning to add a bunch of commands for status check and ssh'ing into the server etc.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
