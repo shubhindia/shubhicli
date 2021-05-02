@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -32,20 +35,53 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("random called")
+		getRandomJoke()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	// Here you will define your flags and configuration settings.
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// randomCmd.PersistentFlags().String("foo", "", "A help for foo")
+type Joke struct {
+	ID     string `json:"id`
+	Joke   string `json:joke`
+	Status int    `json:Status`
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// randomCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func getRandomJoke() {
+	url := "https://icanhazdadjoke.com"
+	responseBytes := getJokeData(url)
+	joke := Joke{}
+	if err := json.Unmarshal(responseBytes, &joke); err != nil {
+		fmt.Println("error:", err)
+
+	}
+	fmt.Println(string(joke.Joke))
+}
+
+func getJokeData(baseAPI string) []byte {
+	request, err := http.NewRequest(
+		http.MethodGet,
+		baseAPI,
+		nil,
+	)
+	if err != nil {
+		fmt.Println("Can't fetch a joke :(")
+	}
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "Shubhicli (github.com/shubhindia/shubhicli)")
+
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	responseBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	return responseBytes
 }
