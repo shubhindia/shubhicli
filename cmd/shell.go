@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 shubhindia <shubhindia123@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -26,13 +29,22 @@ var shellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "A command used to ssh into my devices",
 	Long:  `A simple command to ssh into my devices connected in same network.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		device, _ := cmd.Flags().GetString("device")
+		user, _ := cmd.Flags().GetString("user")
+		if user == "" {
+			fmt.Println("Switching to default user shubhcyanogen")
+			user = "shubhcyanogen"
+		}
 
 		if device != "" {
-			sshIntoDevice(device)
+			return sshIntoDevice(device, user)
+
 		} else {
 			fmt.Println("Error. You must enter a device name")
+			err := "no device"
+			panic(err)
+
 		}
 	},
 }
@@ -40,17 +52,32 @@ var shellCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(shellCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	shellCmd.PersistentFlags().String("device", "", "Device name to which you want to ssh.")
+	shellCmd.PersistentFlags().String("user", "", "SSH username")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// shellCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func sshIntoDevice(device string) {
-	fmt.Println("SSHing into ", device)
+func Exec(command []string) error {
+	binary, err := exec.LookPath(command[0])
+	if err != nil {
+		return err
+	}
+	err = syscall.Exec(binary, command, os.Environ())
+	// Panic rather than returning since this should never happen.
+	panic(err)
+}
+
+func sshIntoDevice(device string, user string) error {
+	fmt.Printf("SSHing into %v with user %v", device, user)
+	/* Adding a temporary logic to get ip of the device from env variables. This is not the most optimized way to do this,
+	but will use this untill I figure out an optimised way */
+	deviceIP := ""
+	if device == "warmachine" {
+		deviceIP = os.Getenv("warmachine")
+	}
+	if device == "rpi" {
+		deviceIP = os.Getenv("rpi")
+	}
+	command := []string{"ssh", user + "@" + deviceIP}
+	return Exec(command)
 }
