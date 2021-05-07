@@ -33,7 +33,7 @@ var shellCmd = &cobra.Command{
 		device, _ := cmd.Flags().GetString("device")
 		user, _ := cmd.Flags().GetString("user")
 		if user == "" {
-			fmt.Println("Switching to default user shubhcyanogen")
+			fmt.Printf("Switching to default user shubhcyanogen \n")
 			user = "shubhcyanogen"
 		}
 
@@ -68,7 +68,7 @@ func Exec(command []string) error {
 }
 
 func sshIntoDevice(device string, user string) error {
-	fmt.Printf("SSHing into %v with user %v", device, user)
+	fmt.Printf("SSHing into %v with user %v \n", device, user)
 	/* Adding a temporary logic to get ip of the device from env variables. This is not the most optimized way to do this,
 	but will use this untill I figure out an optimised way */
 	deviceIP := ""
