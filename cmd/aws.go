@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -52,9 +53,12 @@ func init() {
 	rootCmd.AddCommand(awsCmd)
 
 }
-func awsConfig() aws.Config {
-	cfg, _ := config.LoadDefaultConfig(context.TODO())
-	return cfg
+func awsConfig() (aws.Config, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return cfg, err
+	}
+	return cfg, err
 }
 
 func s3Commands(args []string) {
@@ -64,7 +68,10 @@ func s3Commands(args []string) {
 	switch operation {
 	case "ls":
 
-		cfg := awsConfig()
+		cfg, err := awsConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 		client := s3.NewFromConfig(cfg)
 		fmt.Println(client)
 	}
